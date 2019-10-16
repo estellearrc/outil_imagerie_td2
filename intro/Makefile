@@ -6,21 +6,23 @@ LDLIBS=\
 	-lopencv_imgproc\
 	-lopencv_highgui
 BIN=\
-	readwriteshow\
-	crop\
-	pixels-loops\
-	video-player
+	color-convert\
+	hsv-modification\
+	eq-histogram\
+	adaptative-th\
+	otsu
 
 .PHONY: all
 all: $(BIN)
 
 .PHONY: test
 test:
-	./readwriteshow ../data/lena_color.png a.png; pvisu a.png
-	./crop ../data/lena_color.png 10 100 300 200; pvisu crop.png; pvisu crop-cv.png
-	./pixels-loops ../data/lena_color.png
-	./video-player ../data/video-tribot.mp4
-	./video-player ../data/video-seq4.mp4
+	./color-convert ../data/lena_color.png;
+	./hsv-modification 10 10 10 ../data/horse.png horse-hsv.png; pvisu horse-hsv.png;
+	./eq-histogram ../data/eq_ex.png; pvisu eq.png; pvisu eq-ocn.png; pvisu eq-ex.png; pvisu diff.png
+	./adaptative-th ../data/th-ex.png 10 10; pvisu th.png; pvisu th-ocv-mean.png; pvisu th-ocv-gauss.png; pvisu th-ex.png; pvisu diff.png;
+	./otsu ../data/contraste-3.png; pvisu contraste-3.png; pvisu otsu-th.png; pvisu otsu-th-ocv.png;
+	./otsu ../data/text.png; pvisu text.png; pvisu otsu-th.png; pvisu otsu-th-ocv.png;
 
 .PHONY: clean
 clean:
