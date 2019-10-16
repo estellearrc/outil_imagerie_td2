@@ -17,12 +17,12 @@ all: $(BIN)
 
 .PHONY: test
 test:
-	./color-convert ../data/lena_color.png;
-	./hsv-modification 10 10 10 ../data/horse.png horse-hsv.png; pvisu horse-hsv.png;
-	./eq-histogram ../data/eq_ex.png; pvisu eq.png; pvisu eq-ocn.png; pvisu eq-ex.png; pvisu diff.png
-	./adaptative-th ../data/th-ex.png 10 10; pvisu th.png; pvisu th-ocv-mean.png; pvisu th-ocv-gauss.png; pvisu th-ex.png; pvisu diff.png;
-	./otsu ../data/contraste-3.png; pvisu contraste-3.png; pvisu otsu-th.png; pvisu otsu-th-ocv.png;
-	./otsu ../data/text.png; pvisu text.png; pvisu otsu-th.png; pvisu otsu-th-ocv.png;
+	#./color-convert ../data/lena_color.png;
+	#./hsv-modification 100 0 0 ../data/horse.png horse-hsv.png; pvisu horse-hsv.png;
+	./eq-histogram ../data/eq-ex.png #;pvisu eq.png; pvisu eq-ocn.png; pvisu eq-ex.png; pvisu diff.png
+	#./adaptative-th ../data/th-ex.png 10 10; pvisu th.png; pvisu th-ocv-mean.png; pvisu th-ocv-gauss.png; pvisu th-ex.png; pvisu diff.png;
+	#./otsu ../data/contraste-3.png; pvisu contraste-3.png; pvisu otsu-th.png; pvisu otsu-th-ocv.png;
+	#./otsu ../data/text.png; pvisu text.png; pvisu otsu-th.png; pvisu otsu-th-ocv.png;
 
 .PHONY: clean
 clean:
