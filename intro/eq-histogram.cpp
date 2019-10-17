@@ -21,7 +21,8 @@ process(const char* ims)
     std::cerr<<"The file doesn't exist, check its location.\n"<<std::endl;
     exit(EXIT_FAILURE);
   }
-  Mat image = imread(ims,0);
+  Mat image = imread(ims,1);
+  Mat imageGray = imread(ims,0);
   imshow(ims,image);
   Size s = image.size();
   int h = s.height;
@@ -36,20 +37,30 @@ process(const char* ims)
   }
   vector<int> histogramCumule = vector<int>(256);
   for(int l = 0; l < (int)histogramCumule.size(); l++){
-    for(int p= 0; p < l; p++){
+    for(int p= 0; p <= l; p++){
       histogramCumule.at(l) += histogram.at(p);
+      cout<<histogramCumule.at(l)<<endl;
     }
-    std::cout<<"hC = "<<histogramCumule.at(l)<<std::endl;
   }
-  int Imax = 200;
-  Mat imageRehaussee(image.size(), CV_8UC1);
+  int Imax = 255;
+  Mat imageRehaussee(h,w,CV_8UC3);
   for(int i = 0; i < h; i++){
     for(int j = 0; j < w; j++){
       int k = image.at<Vec3b>(i,j)[0];
-      imageRehaussee.at<Vec3b>(i,j)[0] = Imax * histogramCumule.at(k) / (h*w);
+      int value = Imax * histogramCumule.at(k) / (h*w);
+      imageRehaussee.at<Vec3b>(i,j) = Vec3b(value,value,value);
     }
   }
-  imshow("image réhaussée",imageRehaussee);
+  
+  imwrite("eq.png",imageRehaussee);
+  Mat imageRehausseeOcv;
+  equalizeHist(imageGray, imageRehausseeOcv);
+  imwrite("eq-ocv.png",imageRehausseeOcv);
+
+  Mat rgbchannel[3];
+  split(imageRehaussee, rgbchannel);
+  Mat diff = imageRehausseeOcv - rgbchannel[0];
+  imwrite("diff.png",diff);
   waitKey(0);
 }
 
