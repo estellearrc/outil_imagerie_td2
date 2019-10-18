@@ -7,19 +7,60 @@
 using namespace cv;
 using namespace std;
 
+double mean(Mat block){
+  Size s = block.size();
+  int h = s.height;
+  int w = s.width;
+  int sum;
+  for (int i = 0; i < h; i++){
+    for(int j = 0; j < w; j++){
+      sum += block.at<uchar>(i,j);
+    }
+  }
+  return sum / (h*w);
+}
+
 void
 process(const char* ims, int radius, int cst)
 {
   Mat image = imread(ims,0);
-  (void)radius;
+  Size s = image.size();
+  int h = s.height;
+  int w = s.width;
+  cout<<"h ="<<h<<endl;
+  cout<<"w ="<<w<<endl;
   (void)cst;
-  //Extracting the cropped image from the image "imsname" with 'at' method
-	/*Mat imgcrop(h, w, CV_8UC3);
-	for (int i = 0; i < h; i++){
-		for(int j = 0; j < w; j++){
-			imgcrop.at<Vec3b>(i, j) = image.at<Vec3b>(i0 + i, j0 + j);
-		}
-	}*/
+  Mat imageMoy(h,w,CV_8UC1);
+  for (int i = 0; i < h; i++){
+    for(int j = 0; j < w; j++){
+      Mat block;
+      if(j+radius < w && i+radius < h && j-radius >=0 && i-radius >= 0){
+        cout<<"i-rad="<<i-radius<<endl;
+        cout<<"j-rad"<<j-radius<<endl;
+        block = image(Rect(j-radius,i-radius,2*radius+1,2*radius+1));
+      }
+      else{
+        cout<<"hello"<<endl;
+        int deltaJ = 0;
+        int deltaI = 0;
+        while(j + deltaJ < 0){
+          deltaJ++;
+        }
+        while(i + deltaI < 0){
+          deltaI++;
+        }
+        while(j + deltaJ > w-1){
+          deltaJ--;
+        }
+        while(i + deltaI > h-1){
+          deltaI--;
+        }
+        block = image(Rect(j-radius+deltaJ,i-radius+deltaI,2*radius+1-deltaJ,2*radius+1-deltaI));
+      }
+      imageMoy.at<uchar>(i,j) = mean(block);
+      //cout<<mean(block)<<endl;
+    }
+  }
 }
 
 void
