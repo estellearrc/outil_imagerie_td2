@@ -27,14 +27,14 @@ process(const char* ims)
   Size s = image.size();
   int h = s.height;
   int w = s.width;
-  vector<int> histogram = vector<int>(256);
+  vector<int> histogram = vector<int>(256,0);
   for(int i = 0; i < h; i++){
     for(int j = 0; j < w; j++){
       int k = image.at<uchar>(i,j);
       histogram.at(k) += 1;
     }
   }
-  vector<int> histogramCumule = vector<int>(256);
+  vector<int> histogramCumule = vector<int>(256,0);
   for(int l = 0; l < (int)histogramCumule.size(); l++){
     for(int p= 0; p <= l; p++){
       histogramCumule.at(l) += histogram.at(p);

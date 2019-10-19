@@ -8,7 +8,7 @@ using namespace cv;
 using namespace std;
 
 vector<int> calculateHistogram(Mat image, int h, int w){
-  vector<int> histogram = vector<int>(256);
+  vector<int> histogram = vector<int>(256,0);
   for(int i = 0; i < h; i++){
     for(int j = 0; j < w; j++){
       int k = image.at<uchar>(i,j);
@@ -18,26 +18,29 @@ vector<int> calculateHistogram(Mat image, int h, int w){
   return histogram;
 }
 
-void
-process(const char* ims)
-{
-  Mat image = imread(ims,0);
-  Size s = image.size();
-  int h = s.height;
-  int w = s.width;
-  Mat imageThreshold(h,w,CV_8UC1);
-
-  int threshold, varMax, sum, sumB, q1, q2, mu1, mu2 = 0;
+void manuelOtsuThreshold(Mat image, Mat imageOtsu, int h, int w){
+  int threshold = 0;
+  int varMax = 0;
+  int sum = 0;
+  int sumB = 0;
+  int q1 =0;
+  int q2 =0;
+  int mu1 = 0;
+  int mu2 = 0;
   vector<int> histogram = calculateHistogram(image,h,w);
   int Imax = 255;
   for(int i=0; i<=Imax; i++){
     sum += i*histogram.at(i);
   }
   for(int t=0; t<=Imax; t++){
+    cout<<"t= "<<t<<endl;
     q1 += histogram.at(t);
+    cout<<"q1 ="<<q1<<endl;
     if(q1 == 0)
-      continue;
+      continue; //goes to the next iteration
     q2 = h*w - q1;
+    if(q2 == 0)
+      continue;
 
     sumB += t*histogram.at(t);
     mu1 = sumB / q1;
@@ -46,6 +49,7 @@ process(const char* ims)
     int vb = q1*q2*(mu1 - mu2)^2;
 
     if(vb > varMax){
+      cout<<t<<endl;
       threshold = t;
       varMax = vb;
     }
@@ -53,14 +57,38 @@ process(const char* ims)
   //Binarizing the image
   for(int i = 0; i < h; i++){
     for(int j = 0; j < w; j++){
-    if(image.at<uchar>(i,j) > threshold){
-        imageThreshold.at<uchar>(i,j) = 255;
+      if(image.at<uchar>(i,j) > threshold){
+        imageOtsu.at<uchar>(i,j) = 255;
       }
       else{
-        imageThreshold.at<uchar>(i,j) = 0;
+        imageOtsu.at<uchar>(i,j) = 0;
       }
     }
-  }   
+  }
+  cout<<"manually-obtained threshold = "<<threshold<<endl;   
+}
+
+void
+process(const char* ims)
+{
+  Mat image = imread(ims,0);
+  Size s = image.size();
+  int h = s.height;
+  int w = s.width;
+  Mat imageOtsu(h,w,CV_8UC1);
+
+  //Manual threshold
+  manuelOtsuThreshold(image,imageOtsu,h,w);
+  imshow("otsu-th.png",imageOtsu);
+  imwrite("otsu-th.png",imageOtsu);
+  
+  //OpenCV threshold with otsu method
+  Mat imageOtsuOcv(h,w,CV_8UC1);
+  double t = threshold(image, imageOtsuOcv,0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+  cout<<"openCV-obtained threshold = "<<t<<endl;
+  imwrite("otsu-th-ocv.png",imageOtsuOcv);
+  Mat diff = imageOtsu - imageOtsuOcv;
+  imwrite("diff3.png",diff);
 }
 
 void
@@ -70,7 +98,7 @@ usage (const char *s)
   exit(EXIT_FAILURE);
 }
 
-#define param 2
+#define param 1
 int
 main( int argc, char* argv[] )
 {

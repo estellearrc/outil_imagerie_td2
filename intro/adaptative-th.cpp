@@ -20,7 +20,7 @@ double mean(Mat block){
   return sum / (h*w);
 }
 
-Mat manuelAdaptativeThreshold(Mat image, Mat imageMoy,int radius, int cst){
+void manuelAdaptativeThreshold(Mat image, Mat imageMoy,int radius, int cst){
   Size s = image.size();
   int h = s.height;
   int w = s.width;
@@ -59,7 +59,6 @@ Mat manuelAdaptativeThreshold(Mat image, Mat imageMoy,int radius, int cst){
       }
     }
   }
-  return imageMoy;
 }
 
 void
@@ -72,7 +71,7 @@ process(const char* ims, int radius, int cst)
   Mat imageMoy(h,w,CV_8UC1);
 
   //Manual threshold
-  imageMoy = manuelAdaptativeThreshold(image,imageMoy,radius,cst);
+  manuelAdaptativeThreshold(image,imageMoy,radius,cst);
   imwrite("th.png",imageMoy);
 
   //OpenCV threshold with mean method
