@@ -7,40 +7,66 @@
 using namespace cv;
 using namespace std;
 
-bool exists_file (const char *filename) {
-  //check if the file "filename" exists in the current repository
-    ifstream f(filename);
-    return f.good();
+vector<int> calculateHistogram(Mat image, int h, int w){
+  vector<int> histogram = vector<int>(256);
+  for(int i = 0; i < h; i++){
+    for(int j = 0; j < w; j++){
+      int k = image.at<uchar>(i,j);
+      histogram.at(k) += 1;
+    }
+  }
+  return histogram;
 }
 
 void
-process(const char* imsname, const char* imdname)
+process(const char* ims)
 {
-  std::cout<<"\n\n\n ===================================================\n EXERCICE 1 : READWRITESHOW \n ===================================================" <<std::endl;
+  Mat image = imread(ims,0);
+  Size s = image.size();
+  int h = s.height;
+  int w = s.width;
+  Mat imageThreshold(h,w,CV_8UC1);
 
-  bool exist = exists_file(imsname);
-  if(!exist){
-    std::cerr<<"The file doesn't exist, check its location.\n"<<std::endl;
-    exit(EXIT_FAILURE);
+  int threshold, varMax, sum, sumB, q1, q2, mu1, mu2 = 0;
+  vector<int> histogram = calculateHistogram(image,h,w);
+  int Imax = 255;
+  for(int i=0; i<=Imax; i++){
+    sum += i*histogram.at(i);
   }
-  //Read the image "imsname"
-  Mat image = imread(imsname, CV_LOAD_IMAGE_COLOR);
-  int rows = image.rows;
-  int cols = image.cols;
-  std::cout<<"Number rows = " << rows << " number columns = " << cols << "\n" <<std::endl;
+  for(int t=0; t<=Imax; t++){
+    q1 += histogram.at(t);
+    if(q1 == 0)
+      continue;
+    q2 = h*w - q1;
 
-  //Create and show a magenta picture
-  Mat magenta(100, 200, CV_8UC3, Scalar(255,0,255));
-  imshow("magenta", magenta);
-  imshow(imsname, image);
-  waitKey(0);
-  imwrite(imdname, magenta);
+    sumB += t*histogram.at(t);
+    mu1 = sumB / q1;
+    mu2 = (sum - sumB) / q2;
+
+    int vb = q1*q2*(mu1 - mu2)^2;
+
+    if(vb > varMax){
+      threshold = t;
+      varMax = vb;
+    }
+  }
+  //Binarizing the image
+  for(int i = 0; i < h; i++){
+    for(int j = 0; j < w; j++){
+    if(image.at<uchar>(i,j) > threshold){
+        imageThreshold.at<uchar>(i,j) = 255;
+      }
+      else{
+        imageThreshold.at<uchar>(i,j) = 0;
+      }
+    }
+  }   
 }
 
 void
 usage (const char *s)
 {
-  std::cerr<<"Usage: "<<s<<" imsname imdname\n"<<std::endl;
+  std::cerr<<"Usage: "<<s<<" ims\n"<<std::endl;
   exit(EXIT_FAILURE);
 }
 
@@ -50,6 +76,6 @@ main( int argc, char* argv[] )
 {
   if(argc != (param+1))
     usage(argv[0]);
-  process(argv[1], argv[2]);
+  process(argv[1]);
   return EXIT_SUCCESS;
 }

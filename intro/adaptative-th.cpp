@@ -10,17 +10,56 @@ using namespace std;
 double mean(Mat block){
   Size s = block.size();
   int h = s.height;
-  cout<<h<<endl;
   int w = s.width;
-  cout<<w<<endl;
   int sum = 0;
   for (int i = 0; i < h; i++){
     for(int j = 0; j < w; j++){
       sum += block.at<uchar>(i,j);
     }
   }
-  cout<<sum / (h*w)<<endl;
   return sum / (h*w);
+}
+
+Mat manuelAdaptativeThreshold(Mat image, Mat imageMoy,int radius, int cst){
+  Size s = image.size();
+  int h = s.height;
+  int w = s.width;
+  for (int i = 0; i < h; i++){
+    for(int j = 0; j < w; j++){
+      //Extracting the submatrix to average
+      Mat block;
+      if(j+radius < w && i+radius < h && j-radius >=0 && i-radius >= 0){
+        block = image(Rect(j-radius,i-radius,2*radius+1,2*radius+1));
+      }
+      else{
+        int deltaJ = 0;
+        int deltaI = 0;
+        while(j - radius + deltaJ < 0){
+          deltaJ++;
+        }
+        while(i - radius + deltaI < 0){
+          deltaI++;
+        }
+        while(j + radius + deltaJ > w-1){
+          deltaJ--;
+        }
+        while(i + radius + deltaI > h-1){
+          deltaI--;
+        }
+        block = image(Rect(j-radius+deltaJ,i-radius+deltaI,2*radius+1-abs(deltaJ),2*radius+1-abs(deltaI)));
+      }
+      //Calculating the average of the submatrix (minus the constant)
+      int val = mean(block) - cst;
+      //Binarizing the averaged image
+      if(image.at<uchar>(i,j) <= val){
+        imageMoy.at<uchar>(i,j) = 0;
+      }
+      else{
+        imageMoy.at<uchar>(i,j) = 255;
+      }
+    }
+  }
+  return imageMoy;
 }
 
 void
@@ -31,49 +70,22 @@ process(const char* ims, int radius, int cst)
   int h = s.height;
   int w = s.width;
   Mat imageMoy(h,w,CV_8UC1);
-  for (int i = 0; i < h; i++){
-    for(int j = 0; j < w; j++){
-      //cout<<"i= "<<i-radius<<endl;
-      //cout<<"j= "<<j-radius<<endl;
-      Mat block;
-      if(j+radius < w && i+radius < h && j-radius >=0 && i-radius >= 0){
-        //cout<<"i-rad= "<<i-radius<<endl;
-        //cout<<"j-rad "<<j-radius<<endl;
-        block = image(Rect(j-radius,i-radius,2*radius+1,2*radius+1));
-      }
-      else{
-        int deltaJ = 0;
-        int deltaI = 0;
-        while(j - radius + deltaJ < 0){
-        //cout<<"j - radius + deltaJ "<<j - radius + deltaJ <<endl;
-          deltaJ++;
-        }
-        while(i - radius + deltaI < 0){
-          deltaI++;
-          //cout<<"i - radius + deltaI "<<i - radius + deltaI <<endl;
-        }
-        while(j + radius + deltaJ > w-1){
-          deltaJ--;
-          //cout<<"j + radius + deltaJ "<<j - radius + deltaJ <<endl;
-        }
-        while(i + radius + deltaI > h-1){
-          deltaI--;
-          //cout<<"i + radius + deltaI "<<i - radius + deltaI <<endl;
-        }
-        block = image(Rect(j-radius+deltaJ,i-radius+deltaI,2*radius+1-abs(deltaJ),2*radius+1-abs(deltaI)));
-      }
-      int val = mean(block) - cst;
-      if(imageMoy.at<uchar>(i,j) <= val)
-        imageMoy.at<uchar>(i,j) = 0;
-      else
-        imageMoy.at<uchar>(i,j) = 255;
-      //cout<<mean(block)<<endl;
-    }
-  }
-  imshow("img moy",imageMoy);
+
+  //Manual threshold
+  imageMoy = manuelAdaptativeThreshold(image,imageMoy,radius,cst);
   imwrite("th.png",imageMoy);
-  cout<<"h ="<<h<<endl;
-  cout<<"w ="<<w<<endl;
+
+  //OpenCV threshold with mean method
+  Mat imageMoyOcv(h,w,CV_8UC1);
+  adaptiveThreshold(image, imageMoyOcv, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 2*radius+1, cst);
+  imwrite("th-ocv-mean.png",imageMoyOcv);
+  Mat diff = imageMoy - imageMoyOcv;
+  imwrite("diff2.png",diff);
+
+  //OpenCV threshold with gaussian method
+  Mat imageGaussOcv(h,w,CV_8UC1);
+  adaptiveThreshold(image, imageGaussOcv, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 2*radius+1, cst);
+  imwrite("th-ocv-gauss.png",imageGaussOcv);
 }
 
 void
