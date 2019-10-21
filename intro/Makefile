@@ -22,7 +22,7 @@ test:
 	./eq-histogram ../data/eq-ex.png;pvisu eq.png; pvisu eq-ocv.png; pvisu ../data/eq-ex.png; pvisu diff.png
 	./adaptative-th ../data/th-ex.png 3 4; pvisu th.png; pvisu th-ocv-mean.png; pvisu th-ocv-gauss.png; pvisu ../data/th-ex.png; pvisu diff2.png;
 	./otsu ../data/contraste-3.png; pvisu ../data/contraste-3.png; pvisu otsu-th.png; pvisu otsu-th-ocv.png; pvisu diff3.png;
-	./otsu ../data/text.png; pvisu text.png; pvisu otsu-th.png; pvisu otsu-th-ocv.png;
+	./otsu ../data/text.png; pvisu ../data/text.png; pvisu otsu-th.png; pvisu otsu-th-ocv.png; pvisu diff3.png;
 
 .PHONY: clean
 clean:

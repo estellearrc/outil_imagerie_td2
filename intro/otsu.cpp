@@ -41,14 +41,10 @@ void manuelOtsuThreshold(Mat image, Mat imageOtsu, int h, int w){
     sum += i*histogram.at(i);
   }
   for(int t=0; t<=Imax; t++){
-    //cout<<"t= "<<t<<endl;
     q1 += histogram.at(t);
-    //cout<<"q1 ="<<q1<<endl;
     if(q1 == 0)
       continue; //goes to the next iteration
     q2 = h*w - q1;
-    //if(q2 == 0)
-    //  continue;
 
     sumB += t*histogram.at(t);
     mu1 = sumB / q1;
@@ -57,7 +53,6 @@ void manuelOtsuThreshold(Mat image, Mat imageOtsu, int h, int w){
     vb = q1*q2*(mu1 - mu2)*(mu1 - mu2);
 
     if(vb > varMax){
-      cout<<t<<endl;
       threshold = t;
       varMax = vb;
     }

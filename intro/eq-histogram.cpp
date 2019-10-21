@@ -56,7 +56,6 @@ process(const char* ims)
   }
   //Mat image = imread(ims,1);
   Mat image = imread(ims,0);
-  imshow(ims,image);
   Size s = image.size();
   int h = s.height;
   int w = s.width;

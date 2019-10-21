@@ -24,9 +24,6 @@ process(const char* ims)
     exit(EXIT_FAILURE);
   }
   Mat image = imread(ims, CV_LOAD_IMAGE_COLOR);   // Read the file
- 
-  namedWindow( "Original Image", CV_WINDOW_AUTOSIZE );
-  imshow( "Original Image", image );
     
   Mat rgbchannel[3];
   // The actual splitting.
@@ -41,13 +38,14 @@ process(const char* ims)
   namedWindow("Red",CV_WINDOW_AUTOSIZE);
   imshow("Red", rgbchannel[2]);
 
+  waitKey(0);
+
   Mat imageGrey;
   cvtColor(image, imageGrey, CV_BGR2GRAY);
   imshow("BGR to gray scale", imageGrey);
 
   Mat imageBGR2YCrCb;
   cvtColor(image, imageBGR2YCrCb, CV_BGR2YCrCb);
-  imshow("BGR to YCrCb", imageBGR2YCrCb);
 
   Mat imageYCrCb2BGR;
   cvtColor(imageBGR2YCrCb, imageYCrCb2BGR, CV_YCrCb2BGR);
@@ -55,6 +53,8 @@ process(const char* ims)
 
   Mat diffBGRYCrCb = imageYCrCb2BGR - image;
   imshow("diffBGRYCrCb",diffBGRYCrCb);
+
+  waitKey(0);
 
   Mat yCrCbChannel[3];
   // The actual splitting.
