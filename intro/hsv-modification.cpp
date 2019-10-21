@@ -25,7 +25,7 @@ process(int h, int s, int v, const char* ims, const char* imd)
   Mat image = imread(ims, CV_LOAD_IMAGE_COLOR);
   Mat imageHSV;
   cvtColor(image, imageHSV, CV_BGR2HSV);
-  imshow("HSV",imageHSV);
+  //imshow("HSV",imageHSV);
 
   Mat hsvchannel[3];
   // The actual splitting.

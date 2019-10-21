@@ -50,12 +50,14 @@ void manuelAdaptativeThreshold(Mat image, Mat imageMoy,int radius, int cst){
       }
       //Calculating the average of the submatrix (minus the constant)
       int val = mean(block) - cst;
+      uchar* pointer = image.ptr<uchar>(i);
+      uchar* pointerMoy = imageMoy.ptr<uchar>(i);
       //Binarizing the averaged image
-      if(image.at<uchar>(i,j) <= val){
-        imageMoy.at<uchar>(i,j) = 0;
+      if(pointer[j] <= val){
+        pointerMoy[j] = 0;
       }
       else{
-        imageMoy.at<uchar>(i,j) = 255;
+        pointerMoy[j] = 255;
       }
     }
   }
@@ -85,6 +87,7 @@ process(const char* ims, int radius, int cst)
   Mat imageGaussOcv(h,w,CV_8UC1);
   adaptiveThreshold(image, imageGaussOcv, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 2*radius+1, cst);
   imwrite("th-ocv-gauss.png",imageGaussOcv);
+  waitKey(0);
 }
 
 void

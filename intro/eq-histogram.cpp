@@ -13,6 +13,39 @@ bool exists_file (const char *filename) {
     return f.good();
 }
 
+vector<int> calculateHistogram(Mat image, int h, int w){
+  vector<int> histogram = vector<int>(256,0);
+  for(int i = 0; i < h; i++){
+    uchar* pointer = image.ptr<uchar>(i);
+    for(int j = 0; j < w; j++){
+      int k = pointer[j];
+      histogram.at(k) += 1;
+    }
+  }
+  return histogram;
+}
+
+vector<int> calculateHistogramCumul(vector<int> histogram){
+  vector<int> histogramCumule = vector<int>(256,0);
+  for(int l = 0; l < (int)histogramCumule.size(); l++){
+    for(int p= 0; p <= l; p++){
+      histogramCumule.at(l) += histogram.at(p);
+    }
+  }
+  return histogramCumule;
+}
+
+void enhance(Mat image, Mat imageRehaussee, int h, int w, int Imax, vector<int> histogramCumule){
+  for(int i = 0; i < h; i++){
+    uchar* pointer = image.ptr<uchar>(i);
+    uchar* pointerRehaussee = imageRehaussee.ptr<uchar>(i);
+    for(int j = 0; j < w; j++){
+      int k = pointer[j];
+      pointerRehaussee[j] = Imax * histogramCumule.at(k) / (h*w);
+    }
+  }
+}
+
 void
 process(const char* ims)
 {
@@ -27,27 +60,11 @@ process(const char* ims)
   Size s = image.size();
   int h = s.height;
   int w = s.width;
-  vector<int> histogram = vector<int>(256,0);
-  for(int i = 0; i < h; i++){
-    for(int j = 0; j < w; j++){
-      int k = image.at<uchar>(i,j);
-      histogram.at(k) += 1;
-    }
-  }
-  vector<int> histogramCumule = vector<int>(256,0);
-  for(int l = 0; l < (int)histogramCumule.size(); l++){
-    for(int p= 0; p <= l; p++){
-      histogramCumule.at(l) += histogram.at(p);
-    }
-  }
+  vector<int> histogram = calculateHistogram(image,h,w);
+  vector<int> histogramCumule = calculateHistogramCumul(histogram);
   int Imax = 255;
   Mat imageRehaussee(h,w,CV_8UC1);
-  for(int i = 0; i < h; i++){
-    for(int j = 0; j < w; j++){
-      int k = image.at<uchar>(i,j);
-      imageRehaussee.at<uchar>(i,j) = Imax * histogramCumule.at(k) / (h*w);
-    }
-  }
+  enhance(image, imageRehaussee, h, w, Imax, histogramCumule);
   
   imwrite("eq.png",imageRehaussee);
   Mat imageRehausseeOcv;
